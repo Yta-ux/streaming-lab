@@ -1,66 +1,37 @@
-import { useEffect, useRef, useState } from 'react';
-import { BufferChart } from './components/BufferChart';
-import { Controls } from './components/Controls';
-import { MetricsPanel } from './components/MetricsPanel';
-import { useHlsSession, type LevelInfo } from './hooks/useHlsSession';
+import { useState } from 'react';
+import { ItaloTab } from './tabs/ItaloTab';
+import { NildoTab } from './tabs/NildoTab';
+
+const TABS = [
+  { id: 'italo', label: 'Italo · Rede e QoE' },
+  { id: 'nildo', label: 'Nildo · Formatos e entrega' },
+] as const;
+
+type TabId = (typeof TABS)[number]['id'];
 
 export function App() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [abr, setAbr] = useState(true);
-  const [runKey, setRunKey] = useState(0);
-
-  // The mode of the session that is running, which may differ from the controls
-  // until the next restart.
-  const [fixedLevel, setFixedLevel] = useState(2);
-  const [runMode, setRunMode] = useState({ abr: true, fixedLevel: 2 });
-
-  const { state } = useHlsSession(videoRef, { abr: runMode.abr, fixedLevel: runMode.fixedLevel, runKey });
-
-  // Remembers the ladder so the controls keep their labels between sessions.
-  const [levels, setLevels] = useState<LevelInfo[]>([]);
-  useEffect(() => {
-    if (state.levels.length) setLevels(state.levels);
-  }, [state.levels]);
-
-  const restart = () => {
-    setRunMode({ abr, fixedLevel });
-    setRunKey((key) => key + 1);
-  };
+  const [tab, setTab] = useState<TabId>('italo');
 
   return (
     <main className="layout">
       <h1>Laboratório de Streaming</h1>
 
-      <div className="grid">
-        <div className="stack">
-          <section className="card video-card">
-            <video ref={videoRef} muted playsInline className="video" />
-            {state.phase === 'stalled' && <div className="overlay">Travado: carregando…</div>}
-            {state.phase === 'joining' && <div className="overlay">Iniciando…</div>}
-            {state.phase === 'error' && <div className="overlay overlay-error">{state.error}</div>}
-          </section>
+      <nav className="tabs" role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={tab === t.id ? 'tab tab-active' : 'tab'}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
 
-          <section className="card" aria-label="Buffer">
-            <h2>Nível do buffer</h2>
-            <BufferChart points={state.points} />
-            <p className="legend">
-              <span className="dot dot-line" /> segundos de vídeo à frente · <span className="dot dot-stall" /> travamento
-            </p>
-          </section>
-        </div>
-
-        <div className="stack">
-          <Controls
-            abr={abr}
-            fixedLevel={fixedLevel}
-            levels={levels}
-            onAbrChange={setAbr}
-            onFixedLevelChange={setFixedLevel}
-            onRestart={restart}
-          />
-          <MetricsPanel state={state} />
-        </div>
-      </div>
+      {tab === 'italo' ? <ItaloTab /> : <NildoTab />}
     </main>
   );
 }

@@ -315,3 +315,118 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.tab-active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.subtabs {
+  margin-bottom: 16px;
+}
+
+.manifest {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.card h2 code {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.row-active td {
+  background: var(--accent-soft);
+}
+
+.chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bar-row {
+  margin-bottom: 16px;
+}
+
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.bar-track {
+  position: relative;
+  height: 22px;
+  background: var(--accent-soft);
+  border-radius: 6px;
+}
+
+.bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+}
+
+.bar-bad {
+  background: var(--bad);
+}
+
+.bar-limit {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--text);
+}
+
+.bad-text {
+  color: var(--bad);
+}

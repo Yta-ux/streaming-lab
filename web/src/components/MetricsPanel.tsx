@@ -10,14 +10,14 @@ const PHASE_LABEL: Record<Phase, string> = {
   error: 'Erro',
 };
 
-interface MetricProps {
+export interface MetricProps {
   label: string;
   value: string;
   hint?: string;
   tone?: 'good' | 'bad';
 }
 
-function Metric({ label, value, hint, tone }: MetricProps) {
+export function Metric({ label, value, hint, tone }: MetricProps) {
   return (
     <div className={`metric${tone ? ` metric-${tone}` : ''}`}>
       <span className="metric-label">{label}</span>
