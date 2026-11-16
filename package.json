@@ -1,0 +1,25 @@
+{
+  "name": "streaming-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Laboratório de streaming: player HLS com painel de QoE e rede simulada",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "video": "node scripts/generate-video.mjs",
+    "dev": "concurrently -n server,web -c blue,green \"pnpm --filter @streaming-lab/server dev\" \"pnpm --filter @streaming-lab/web dev\"",
+    "build": "pnpm --filter @streaming-lab/web build",
+    "start": "pnpm build && pnpm --filter @streaming-lab/server start",
+    "test": "pnpm --filter @streaming-lab/web test",
+    "typecheck": "pnpm --filter @streaming-lab/web typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "ffmpeg-static": "^5.2.0"
+  },
+  "packageManager": "pnpm@10.24.0"
+}
