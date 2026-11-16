@@ -117,7 +117,7 @@ export function Controls({ abr, fixedLevel, levels, onAbrChange, onFixedLevelCha
       <button type="button" className="primary" onClick={onRestart}>
         Reiniciar reprodução
       </button>
-      <p className="note">Reiniciar encerra a execução atual, salva o resultado no histórico e começa outra com as opções escolhidas.</p>
+      <p className="note">Reiniciar começa uma nova sessão com as opções escolhidas.</p>
     </section>
   );
 }

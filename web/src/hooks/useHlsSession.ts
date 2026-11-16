@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useState, type RefObject } from 'react';
 import Hls from 'hls.js';
 import {
   bufferAheadSeconds,
   bufferingRatio,
-  weightedBitrateKbps,
   type RunSummary,
 } from '../lib/metrics';
 
@@ -57,7 +56,6 @@ const EMPTY_SUMMARY: RunSummary = {
   stallMs: 0,
   playMs: 0,
   bufferingRatio: 0,
-  avgBitrateKbps: 0,
 };
 
 const INITIAL_STATE: SessionState = {
@@ -79,7 +77,6 @@ const INITIAL_STATE: SessionState = {
  */
 export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: SessionOptions) {
   const [state, setState] = useState<SessionState>(INITIAL_STATE);
-  const summaryRef = useRef<() => RunSummary>(() => EMPTY_SUMMARY);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -101,7 +98,6 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
     let stalls = 0;
     let stallMs = 0;
     let playMs = 0;
-    const timeByBitrate = new Map<number, number>();
     let points: ChartPoint[] = [];
     let levels: LevelInfo[] = [];
 
@@ -118,9 +114,7 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
       stallMs,
       playMs,
       bufferingRatio: bufferingRatio(stallMs, playMs),
-      avgBitrateKbps: weightedBitrateKbps(timeByBitrate),
     });
-    summaryRef.current = summary;
 
     const currentLevelIndex = () => (hls.currentLevel >= 0 ? hls.currentLevel : hls.loadLevel);
 
@@ -144,8 +138,6 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
 
       if (phase === 'playing') {
         playMs += dt;
-        const kbps = levels[currentLevelIndex()]?.bitrateKbps;
-        if (kbps) timeByBitrate.set(kbps, (timeByBitrate.get(kbps) ?? 0) + dt);
       } else if (phase === 'stalled') {
         stallMs += dt;
       }
@@ -205,13 +197,10 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
       hls.destroy();
       video.removeAttribute('src');
       video.load();
-      summaryRef.current = () => EMPTY_SUMMARY;
       setState(INITIAL_STATE);
     };
     // Options are read once per session; a new session starts when runKey changes.
   }, [options.runKey, videoRef]);
 
-  const getSummary = useCallback(() => summaryRef.current(), []);
-
-  return { state, getSummary };
+  return { state };
 }

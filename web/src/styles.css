@@ -46,15 +46,9 @@ body {
   padding: 24px 16px 48px;
 }
 
-.header h1 {
-  margin: 0 0 4px;
-  font-size: 1.7rem;
-}
-
-.header p {
-  margin: 0 0 20px;
-  color: var(--muted);
-  max-width: 70ch;
+h1 {
+  margin: 0 0 16px;
+  font-size: 1.6rem;
 }
 
 .grid {
@@ -117,16 +111,6 @@ body {
 
 .overlay-error {
   background: rgba(120, 10, 10, 0.75);
-}
-
-.progress {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.progress-bar {
-  height: 100%;
-  background: var(--accent);
 }
 
 .chart {
@@ -257,16 +241,6 @@ body {
   filter: brightness(1.08);
 }
 
-.link {
-  margin-left: auto;
-  background: none;
-  border: 0;
-  color: var(--accent);
-  font: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
 .note {
   margin: 8px 0 0;
   font-size: 0.82rem;
@@ -334,36 +308,6 @@ body {
 
 .badge-playing {
   color: var(--good);
-}
-
-.table-wrap {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-  font-variant-numeric: tabular-nums;
-}
-
-th,
-td {
-  text-align: left;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-
-th {
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 0.78rem;
-}
-
-td.bad {
-  color: var(--bad);
-  font-weight: 700;
 }
 
 @media (max-width: 860px) {

@@ -12,31 +12,12 @@ export interface RunSummary {
   playMs: number;
   /** Stalled time divided by (stalled + playing) time, from 0 to 1. */
   bufferingRatio: number;
-  /** Average bitrate weighted by the time spent in each level, in kbit/s. */
-  avgBitrateKbps: number;
 }
 
 /** Buffering ratio: stalled time over total session time (playing + stalled). */
 export function bufferingRatio(stallMs: number, playMs: number): number {
   const total = stallMs + playMs;
   return total > 0 ? stallMs / total : 0;
-}
-
-/** Rebuffering events per minute of session. */
-export function rebufferRate(stalls: number, stallMs: number, playMs: number): number {
-  const minutes = (stallMs + playMs) / 60_000;
-  return minutes > 0 ? stalls / minutes : 0;
-}
-
-/** Average bitrate weighted by the time spent at each bitrate. */
-export function weightedBitrateKbps(timeByBitrate: ReadonlyMap<number, number>): number {
-  let weighted = 0;
-  let total = 0;
-  for (const [kbps, ms] of timeByBitrate) {
-    weighted += kbps * ms;
-    total += ms;
-  }
-  return total > 0 ? weighted / total : 0;
 }
 
 /** Seconds of video buffered ahead of the playhead. */

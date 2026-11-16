@@ -38,9 +38,9 @@ pnpm start       # compila a interface e serve tudo em http://localhost:3001
 
 ## Como usar
 
-1. **Rede simulada:** escolha um limite de banda (botões ou controle deslizante). A mudança vale imediatamente, inclusive no meio de um segmento.
+1. **Rede simulada:** escolha o limite de banda (botões ou controle deslizante). A mudança vale imediatamente, inclusive no meio de um segmento.
 2. **Player:** ligue ou desligue o ABR. Com o ABR desligado, escolha a qualidade fixa.
-3. **Reiniciar reprodução:** salva a execução atual no histórico e começa outra com as opções escolhidas. O histórico permite comparar configurações.
+3. **Reiniciar reprodução:** começa uma nova sessão com as opções escolhidas.
 
 Experimentos sugeridos:
 
@@ -48,7 +48,6 @@ Experimentos sugeridos:
 |---|---|---|
 | Referência | Sem limite, ABR ligado | Sobe para 720p, buffer cheio, sem travamentos |
 | Rede insuficiente | 1 Mbit/s, qualidade fixa 720p | Travamentos repetidos, taxa de buffering acima de 50% |
-| Adaptação | 1 Mbit/s, ABR ligado | Reproduz em 240p, sem travamentos |
 | Queda de banda | Sem limite, ABR ligado, depois 1 Mbit/s durante a reprodução | O buffer absorve a queda e o player reduz a qualidade |
 
 ## Como funciona
@@ -77,8 +76,6 @@ Experimentos sugeridos:
 | Tempo de início (*join time*) | Do início da sessão até o primeiro quadro exibido |
 | Travamentos | Interrupções da reprodução depois que ela começou (evento `waiting`) |
 | Taxa de buffering (*buffering ratio*) | Tempo travado dividido pelo tempo total da sessão |
-| Frequência de travamentos | Travamentos por minuto de sessão |
-| Bitrate médio | Média dos bitrates reproduzidos, ponderada pelo tempo em cada um |
 | Buffer à frente | Segundos de vídeo já recebidos além da posição atual |
 
 As funções de cálculo estão em `web/src/lib/metrics.ts`, separadas do DOM e cobertas por testes unitários.
@@ -92,8 +89,7 @@ streaming-lab/
 ├── web/src/
 │   ├── hooks/useHlsSession.ts   sessão do player e coleta de métricas
 │   ├── lib/metrics.ts           cálculo das métricas (testado)
-│   └── components/              player, gráfico, controles, métricas, histórico
-└── docs/roteiro-video.md        roteiro da apresentação em vídeo
+│   └── components/              player, gráfico, controles, métricas
 ```
 
 ## Comandos

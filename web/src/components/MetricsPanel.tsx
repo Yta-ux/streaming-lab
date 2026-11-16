@@ -1,5 +1,5 @@
 import type { Phase, SessionState } from '../hooks/useHlsSession';
-import { formatKbps, formatPercent, formatSeconds, rebufferRate } from '../lib/metrics';
+import { formatKbps, formatPercent, formatSeconds } from '../lib/metrics';
 
 const PHASE_LABEL: Record<Phase, string> = {
   idle: 'Parado',
@@ -50,11 +50,6 @@ export function MetricsPanel({ state }: { state: SessionState }) {
           hint="tempo travado / tempo total"
           tone={ratioTone}
         />
-        <Metric
-          label="Frequência de travamentos"
-          value={`${rebufferRate(summary.stalls, summary.stallMs, summary.playMs).toFixed(1)}/min`}
-        />
-        <Metric label="Bitrate médio" value={summary.avgBitrateKbps ? formatKbps(summary.avgBitrateKbps) : '—'} hint="ponderado pelo tempo" />
       </div>
     </section>
   );
