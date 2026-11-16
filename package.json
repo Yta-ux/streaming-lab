@@ -11,6 +11,7 @@
   },
   "scripts": {
     "video": "node scripts/generate-video.mjs",
+    "codecs": "node scripts/generate-codecs.mjs",
     "dev": "concurrently -n server,web -c blue,green \"pnpm --filter @streaming-lab/server dev\" \"pnpm --filter @streaming-lab/web dev\"",
     "build": "pnpm --filter @streaming-lab/web build",
     "start": "pnpm build && pnpm --filter @streaming-lab/server start",

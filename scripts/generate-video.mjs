@@ -1,4 +1,5 @@
-// Generates a synthetic HLS ladder (3 renditions) into ./media using ffmpeg.
+// Generates a synthetic ladder (3 renditions) into ./media using ffmpeg, as HLS
+// (./media/master.m3u8) and as MPEG-DASH (./media/dash/manifest.mpd).
 // The source is a lavfi test pattern with a running timer, so no video file
 // needs to be downloaded or committed to the repository.
 
@@ -73,6 +74,51 @@ for (const rendition of LADDER) {
   }
 }
 
+// MPEG-DASH: same ladder and codec, packaged as fMP4 segments plus an .mpd
+// manifest. One ffmpeg run scales a single 720p source into the three sizes.
+console.log('Gerando MPEG-DASH...');
+const dashDir = path.join(mediaDir, 'dash');
+mkdirSync(dashDir, { recursive: true });
+const gop = FPS * SEGMENT_S;
+const dashArgs = [
+  '-y',
+  '-f', 'lavfi',
+  '-i', `testsrc2=size=1280x720:rate=${FPS}`,
+  '-f', 'lavfi',
+  '-i', 'sine=frequency=440:sample_rate=44100',
+  '-t', String(DURATION_S),
+  '-filter_complex',
+  `[0:v]noise=alls=12:allf=t,split=${LADDER.length}${LADDER.map((_, i) => `[s${i}]`).join('')};` +
+    LADDER.map((r, i) => `[s${i}]scale=${r.width}:${r.height}[v${i}]`).join(';'),
+  ...LADDER.flatMap((_, i) => ['-map', `[v${i}]`]),
+  '-map', '1:a',
+  '-c:v', 'libx264',
+  '-preset', 'veryfast',
+  '-pix_fmt', 'yuv420p',
+  '-g', String(gop),
+  '-keyint_min', String(gop),
+  '-sc_threshold', '0',
+  ...LADDER.flatMap((r, i) => [
+    `-b:v:${i}`, `${r.videoKbps}k`,
+    `-maxrate:v:${i}`, `${r.videoKbps}k`,
+    `-bufsize:v:${i}`, `${r.videoKbps * 2}k`,
+  ]),
+  '-c:a', 'aac',
+  '-b:a', `${AUDIO_KBPS}k`,
+  '-f', 'dash',
+  '-seg_duration', String(SEGMENT_S),
+  '-use_template', '1',
+  '-use_timeline', '1',
+  '-adaptation_sets', `id=0,streams=${LADDER.map((_, i) => i).join(',')} id=1,streams=${LADDER.length}`,
+  path.join(dashDir, 'manifest.mpd'),
+];
+const dashResult = spawnSync(ffmpeg, dashArgs, { stdio: ['ignore', 'ignore', 'pipe'], encoding: 'utf8' });
+if (dashResult.status !== 0) {
+  console.error(dashResult.stderr);
+  console.error('Falha ao gerar o MPEG-DASH.');
+  process.exit(1);
+}
+
 const master = [
   '#EXTM3U',
   '#EXT-X-VERSION:3',
@@ -84,4 +130,4 @@ const master = [
 ].join('\n');
 
 writeFileSync(path.join(mediaDir, 'master.m3u8'), master);
-console.log(`Pronto: ${path.relative(root, mediaDir)}/master.m3u8`);
+console.log('Pronto: media/master.m3u8 (HLS) e media/dash/manifest.mpd (DASH)');

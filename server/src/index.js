@@ -1,7 +1,7 @@
 // Origin server for the streaming lab.
 //
-// - Serves the HLS files from ./media.
-// - Limits the download rate of media segments to a value that can be changed
+// - Serves the HLS and MPEG-DASH files (and the codec clips) from ./media.
+// - Limits the download rate of media segments (.ts and .m4s) to a value that can be changed
 //   at runtime through /api/bandwidth. This is what simulates a congested link.
 // - Optionally serves the production build of the web app (./web/dist).
 
@@ -27,6 +27,10 @@ let bandwidthKbps = 0;
 const MIME = {
   '.m3u8': 'application/vnd.apple.mpegurl',
   '.ts': 'video/mp2t',
+  '.mpd': 'application/dash+xml',
+  '.m4s': 'video/iso.segment',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -111,20 +115,36 @@ async function serveMedia(req, res, urlPath) {
   }
 
   const ext = path.extname(filePath);
-  res.writeHead(200, {
+  const headers = {
     'Content-Type': MIME[ext] ?? 'application/octet-stream',
-    'Content-Length': stat.size,
     // Segments must always go through the throttle; a cached copy would hide it.
     'Cache-Control': 'no-store',
-  });
+  };
+
+  // The codec clips are plain files played by <video>, which asks for byte ranges.
+  const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range ?? '');
+  if (range && (ext === '.mp4' || ext === '.webm')) {
+    const start = range[1] ? Number(range[1]) : 0;
+    const end = range[2] ? Math.min(Number(range[2]), stat.size - 1) : stat.size - 1;
+    res.writeHead(206, {
+      ...headers,
+      'Accept-Ranges': 'bytes',
+      'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+      'Content-Length': end - start + 1,
+    });
+    fs.createReadStream(filePath, { start, end }).pipe(res);
+    return;
+  }
+
+  res.writeHead(200, { ...headers, 'Accept-Ranges': 'bytes', 'Content-Length': stat.size });
 
   if (req.method === 'HEAD') {
     res.end();
     return;
   }
 
-  // Playlists are tiny and are not limited; only segments are.
-  if (ext === '.ts') await sendThrottled(res, filePath, stat.size);
+  // Playlists and manifests are tiny and are not limited; only segments are.
+  if (ext === '.ts' || ext === '.m4s') await sendThrottled(res, filePath, stat.size);
   else fs.createReadStream(filePath).pipe(res);
 }
 
