@@ -11,7 +11,7 @@ const SECTIONS = [
 
 type SectionId = (typeof SECTIONS)[number]['id'];
 
-export function NildoTab() {
+export function DeliveryTab() {
   const [section, setSection] = useState<SectionId>('protocol');
 
   return (

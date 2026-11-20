@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { ItaloTab } from './tabs/ItaloTab';
-import { NildoTab } from './tabs/NildoTab';
+import { DeliveryTab } from './tabs/DeliveryTab';
+import { NetworkTab } from './tabs/NetworkTab';
 
 const TABS = [
-  { id: 'italo', label: 'Italo · Rede e QoE' },
-  { id: 'nildo', label: 'Nildo · Formatos e entrega' },
+  { id: 'network', label: 'Rede e QoE' },
+  { id: 'delivery', label: 'Formatos e entrega' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
 
 export function App() {
-  const [tab, setTab] = useState<TabId>('italo');
+  const [tab, setTab] = useState<TabId>('network');
 
   return (
     <main className="layout">
@@ -32,7 +32,7 @@ export function App() {
         </nav>
       </header>
 
-      {tab === 'italo' ? <ItaloTab /> : <NildoTab />}
+      {tab === 'network' ? <NetworkTab /> : <DeliveryTab />}
     </main>
   );
 }

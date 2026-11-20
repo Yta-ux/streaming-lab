@@ -2,10 +2,10 @@
 
 Aplicação web para observar, na prática, como a rede afeta a reprodução de vídeo e como o vídeo é codificado e entregue. Um player reproduz um vídeo servido por uma origem cuja banda pode ser limitada em tempo real, e um painel mede a qualidade de experiência (QoE) dentro do próprio player.
 
-A interface tem duas abas, uma para cada parte do trabalho:
+A interface tem duas abas, cada uma com um conjunto de testes:
 
-- **Italo · Rede e QoE:** buffer, rebuffering, ABR e métricas de QoE.
-- **Nildo · Formatos e entrega:** HLS x MPEG-DASH, codecs e unicast x multicast.
+- **Rede e QoE:** buffer, rebuffering, ABR e métricas de QoE.
+- **Formatos e entrega:** HLS x MPEG-DASH, codecs e unicast x multicast.
 
 Projeto prático do seminário **Streaming e Distribuição Multimídia** (Tópicos Especiais em Redes de Computadores), que tratou de buffering, congestionamento e QoE.
 
@@ -13,13 +13,13 @@ Projeto prático do seminário **Streaming e Distribuição Multimídia** (Tópi
 
 | Conceito do seminário | Aba | Onde aparece |
 |---|---|---|
-| Buffer de reprodução e rebuffering | Italo | Gráfico do nível do buffer e contagem de travamentos |
-| Vazão menor que a taxa de bits do vídeo | Italo | Qualidade fixa em 720p com banda limitada: o buffer esvazia e o vídeo trava |
-| ABR (adaptação de taxa de bits) | Italo e Nildo | Com o ABR ligado, o player reduz a qualidade quando a vazão cai |
-| QoE medida no cliente (Dobrian et al., 2011) | Italo | Painel com tempo de início, travamentos e taxa de buffering |
-| HLS e MPEG-DASH | Nildo | O mesmo vídeo entregue pelos dois protocolos, com o manifesto na tela |
-| Codecs | Nildo | O mesmo clipe em H.264, H.265, VP9 e AV1, com tamanho, qualidade (PSNR) e tempo de codificação |
-| Unicast x multicast | Nildo | Banda da origem para N espectadores (simulação) |
+| Buffer de reprodução e rebuffering | Rede e QoE | Gráfico do nível do buffer e contagem de travamentos |
+| Vazão menor que a taxa de bits do vídeo | Rede e QoE | Qualidade fixa em 720p com banda limitada: o buffer esvazia e o vídeo trava |
+| ABR (adaptação de taxa de bits) | Ambas | Com o ABR ligado, o player reduz a qualidade quando a vazão cai |
+| QoE medida no cliente (Dobrian et al., 2011) | Rede e QoE | Painel com tempo de início, travamentos e taxa de buffering |
+| HLS e MPEG-DASH | Formatos e entrega | O mesmo vídeo entregue pelos dois protocolos, com o manifesto na tela |
+| Codecs | Formatos e entrega | O mesmo clipe em H.264, H.265, VP9 e AV1, com tamanho, qualidade (PSNR) e tempo de codificação |
+| Unicast x multicast | Formatos e entrega | Banda da origem para N espectadores (simulação) |
 
 ## Requisitos
 
@@ -34,7 +34,7 @@ O ffmpeg é instalado automaticamente como dependência (`ffmpeg-static`); não 
 ```bash
 pnpm install
 pnpm video   # gera o vídeo HLS e DASH em ./media (cerca de 45 s)
-pnpm codecs  # gera os clipes da aba Nildo (cerca de 1 min, o AV1 é lento)
+pnpm codecs  # gera os clipes da aba Formatos e entrega (cerca de 1 min, o AV1 é lento)
 pnpm dev     # servidor em :3001 e interface em :5173
 ```
 
@@ -48,7 +48,7 @@ pnpm start       # compila a interface e serve tudo em http://localhost:3001
 
 ## Como usar
 
-### Aba Italo
+### Aba Rede e QoE
 
 1. **Rede simulada:** escolha o limite de banda (botões ou controle deslizante). A mudança vale imediatamente, inclusive no meio de um segmento.
 2. **Player:** ligue ou desligue o ABR. Com o ABR ligado, o player começa no 240p e sobe conforme a vazão permite. Com o ABR desligado, escolha a qualidade fixa.
@@ -63,13 +63,13 @@ Experimentos sugeridos:
 | Queda de banda | Sem limite, ABR ligado, depois 1 Mbit/s durante a reprodução | O buffer absorve a queda; depois de cerca de 40 s o player reduz para 240p |
 | Limite do ABR | 500 kbit/s, ABR ligado | O player fica no 240p, o piso, e ainda trava: a rede é menor que a menor qualidade |
 
-### Aba Nildo
+### Aba Formatos e entrega
 
 1. **HLS x MPEG-DASH:** escolha o protocolo e o limite de banda. O manifesto aparece embaixo, e as métricas são as mesmas para os dois.
 2. **Codecs:** tabela com o mesmo clipe em quatro codecs, todos no mesmo bitrate. Mostra tamanho, PSNR, tempo de codificação e se o navegador toca o codec. O botão *Tocar* abre o clipe.
 3. **Unicast x multicast:** escolha o número de espectadores e a qualidade. O gráfico compara a banda de saída da origem nos dois modos. É uma simulação.
 
-Experimentos sugeridos na aba Nildo:
+Experimentos sugeridos na aba Formatos e entrega:
 
 | Experimento | Configuração | Resultado esperado |
 |---|---|---|
@@ -97,7 +97,7 @@ Experimentos sugeridos na aba Nildo:
 | `GET /api/bandwidth` | Limite atual em kbit/s (`0` = sem limite) |
 | `POST /api/bandwidth` | Define o limite. Corpo: `{"kbps": 1000}`. Aceita `0` ou valores de 50 a 100000 |
 
-**Métricas.** Na aba Italo, o hook `web/src/hooks/useHlsSession.ts` observa os eventos do elemento `<video>` e do hls.js, seguindo as definições do artigo de Dobrian et al. (2011):
+**Métricas.** Na aba Rede e QoE, o hook `web/src/hooks/useHlsSession.ts` observa os eventos do elemento `<video>` e do hls.js, seguindo as definições do artigo de Dobrian et al. (2011):
 
 | Métrica | Definição |
 |---|---|
@@ -118,7 +118,7 @@ streaming-lab/
 │   └── generate-codecs.mjs      gera os clipes de codecs e mede o PSNR
 ├── server/src/index.js          origem com limitador de banda
 ├── web/src/
-│   ├── tabs/                    aba Italo e aba Nildo
+│   ├── tabs/                    Rede e QoE; Formatos e entrega
 │   ├── hooks/                   sessões de player (HLS; HLS e DASH) e coleta de métricas
 │   ├── lib/metrics.ts           cálculo das métricas (testado)
 │   └── components/              player, gráfico, controles, métricas, codecs, multicast

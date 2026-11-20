@@ -4,7 +4,7 @@ import { Controls } from '../components/Controls';
 import { MetricsPanel } from '../components/MetricsPanel';
 import { useHlsSession, type LevelInfo } from '../hooks/useHlsSession';
 
-export function ItaloTab() {
+export function NetworkTab() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [abr, setAbr] = useState(true);
   const [runKey, setRunKey] = useState(0);
