@@ -14,9 +14,9 @@ export function App() {
 
   return (
     <main className="layout">
-      <h1>Laboratório de Streaming</h1>
-
-      <nav className="tabs" role="tablist">
+      <header className="topbar">
+        <h1>Laboratório de Streaming</h1>
+        <nav className="tabs" role="tablist">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -29,7 +29,8 @@ export function App() {
             {t.label}
           </button>
         ))}
-      </nav>
+        </nav>
+      </header>
 
       {tab === 'italo' ? <ItaloTab /> : <NildoTab />}
     </main>

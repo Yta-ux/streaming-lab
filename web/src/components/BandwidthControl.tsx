@@ -26,13 +26,11 @@ async function applyBandwidth(kbps: number): Promise<boolean> {
   }
 }
 
-/** Buttons and slider that set the bandwidth limit of the simulated network. */
 export function BandwidthControl() {
   const [kbps, setKbps] = useState(0);
   const [serverOk, setServerOk] = useState(true);
   const debounce = useRef<number>();
 
-  // Syncs with the server on load, so a reload shows the real limit.
   useEffect(() => {
     fetch('/api/bandwidth')
       .then((r) => r.json())

@@ -9,14 +9,11 @@ export function ItaloTab() {
   const [abr, setAbr] = useState(true);
   const [runKey, setRunKey] = useState(0);
 
-  // The mode of the session that is running, which may differ from the controls
-  // until the next restart.
   const [fixedLevel, setFixedLevel] = useState(2);
   const [runMode, setRunMode] = useState({ abr: true, fixedLevel: 2 });
 
   const { state } = useHlsSession(videoRef, { abr: runMode.abr, fixedLevel: runMode.fixedLevel, runKey });
 
-  // Remembers the ladder so the controls keep their labels between sessions.
   const [levels, setLevels] = useState<LevelInfo[]>([]);
   useEffect(() => {
     if (state.levels.length) setLevels(state.levels);

@@ -15,11 +15,14 @@ export interface LevelInfo {
 }
 
 export interface ChartPoint {
-  /** Seconds since the session started. */
   t: number;
-  /** Seconds of video buffered ahead of the playhead. */
   buffer: number;
   stalled: boolean;
+}
+
+export interface LevelSwitch {
+  t: number;
+  level: number;
 }
 
 export interface SessionState {
@@ -28,26 +31,23 @@ export interface SessionState {
   levels: LevelInfo[];
   currentLevel: number;
   bufferSeconds: number;
-  /** Throughput estimated by hls.js from the segment downloads, in kbit/s. */
   estimateKbps: number;
   position: number;
   duration: number;
   points: ChartPoint[];
+  switches: LevelSwitch[];
   summary: RunSummary;
 }
 
 export interface SessionOptions {
-  /** true: hls.js picks the level (ABR). false: the level is fixed. */
   abr: boolean;
-  /** Level index used when ABR is off. */
   fixedLevel: number;
-  /** Changing this value starts a new session. */
   runKey: number;
 }
 
 const MASTER_URL = '/media/master.m3u8';
 const TICK_MS = 250;
-const MAX_POINTS = 240; // 60 s of chart at 4 samples per second
+const MAX_POINTS = 240;
 const MAX_BUFFER_S = 30;
 
 const EMPTY_SUMMARY: RunSummary = {
@@ -68,13 +68,10 @@ const INITIAL_STATE: SessionState = {
   position: 0,
   duration: 0,
   points: [],
+  switches: [],
   summary: EMPTY_SUMMARY,
 };
 
-/**
- * Runs one HLS playback session and measures it from inside the player,
- * the same approach used by Dobrian et al. (2011).
- */
 export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: SessionOptions) {
   const [state, setState] = useState<SessionState>(INITIAL_STATE);
 
@@ -89,7 +86,6 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
 
     const { abr, fixedLevel } = options;
 
-    // Measurements for this session.
     const startedAt = performance.now();
     let lastTick = startedAt;
     let phase: Phase = 'joining';
@@ -99,13 +95,16 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
     let stallMs = 0;
     let playMs = 0;
     let points: ChartPoint[] = [];
+    let switches: LevelSwitch[] = [];
     let levels: LevelInfo[] = [];
 
     const hls = new Hls({
       maxBufferLength: MAX_BUFFER_S,
       maxMaxBufferLength: MAX_BUFFER_S,
       backBufferLength: 10,
-      startLevel: abr ? -1 : fixedLevel,
+      // ABR starts at the lowest quality and climbs as the throughput allows, like a real
+      // player. Letting hls.js guess would jump straight to 720p on a fast local server.
+      startLevel: abr ? 0 : fixedLevel,
     });
 
     const summary = (): RunSummary => ({
@@ -160,6 +159,7 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
         position: video.currentTime,
         duration: Number.isFinite(video.duration) ? video.duration : 0,
         points,
+        switches,
         summary: summary(),
       });
     };
@@ -172,6 +172,10 @@ export function useHlsSession(videoRef: RefObject<HTMLVideoElement>, options: Se
       }));
       if (!abr) hls.currentLevel = fixedLevel;
       video.play().catch(() => undefined);
+    });
+
+    hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+      switches = [...switches, { t: (performance.now() - startedAt) / 1000, level: data.level }];
     });
 
     hls.on(Hls.Events.ERROR, (_event, data) => {

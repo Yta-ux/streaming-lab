@@ -32,10 +32,6 @@ const INITIAL: ProtocolState = {
 
 const TICK_MS = 250;
 
-/**
- * Plays the same video through HLS (hls.js) or MPEG-DASH (dash.js) and measures
- * the same metrics for both, so the two protocols can be compared.
- */
 export function useProtocolSession(videoRef: RefObject<HTMLVideoElement>, protocol: Protocol, runKey: number) {
   const [state, setState] = useState<ProtocolState>(INITIAL);
 

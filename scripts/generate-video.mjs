@@ -1,7 +1,3 @@
-// Generates a synthetic ladder (3 renditions) into ./media using ffmpeg, as HLS
-// (./media/master.m3u8) and as MPEG-DASH (./media/dash/manifest.mpd).
-// The source is a lavfi test pattern with a running timer, so no video file
-// needs to be downloaded or committed to the repository.
 
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -17,7 +13,6 @@ const DURATION_S = 120;
 const SEGMENT_S = 4;
 const FPS = 30;
 
-/** Bitrates are the video target; audio adds 64 kbit/s on top. */
 const LADDER = [
   { name: '240p', width: 426, height: 240, videoKbps: 400 },
   { name: '480p', width: 854, height: 480, videoKbps: 1000 },
@@ -74,8 +69,6 @@ for (const rendition of LADDER) {
   }
 }
 
-// MPEG-DASH: same ladder and codec, packaged as fMP4 segments plus an .mpd
-// manifest. One ffmpeg run scales a single 720p source into the three sizes.
 console.log('Gerando MPEG-DASH...');
 const dashDir = path.join(mediaDir, 'dash');
 mkdirSync(dashDir, { recursive: true });

@@ -7,7 +7,6 @@ const QUALITIES = [
   { name: '720p', kbps: 2564 },
 ];
 
-/** Upload capacity of the origin link, in kbit/s. */
 const ORIGIN_CAPACITY_KBPS = 100_000;
 const MAX_VIEWERS = 200;
 

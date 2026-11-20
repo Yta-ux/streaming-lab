@@ -2,14 +2,12 @@ import type { ChartPoint } from '../hooks/useHlsSession';
 
 interface Props {
   points: ChartPoint[];
-  /** Upper bound of the vertical axis, in seconds. */
   maxSeconds?: number;
-  /** Width of the visible window, in seconds. */
   windowSeconds?: number;
 }
 
 const WIDTH = 600;
-const HEIGHT = 180;
+const HEIGHT = 130;
 const PAD = { top: 10, right: 10, bottom: 22, left: 34 };
 
 export function BufferChart({ points, maxSeconds = 30, windowSeconds = 60 }: Props) {
@@ -28,7 +26,6 @@ export function BufferChart({ points, maxSeconds = 30, windowSeconds = 60 }: Pro
     ? `${x(visible[0].t).toFixed(1)},${y(0)} ${line} ${x(visible[visible.length - 1].t).toFixed(1)},${y(0)}`
     : '';
 
-  // Contiguous stalled runs become highlighted bands.
   const bands: { from: number; to: number }[] = [];
   for (const p of visible) {
     const open = bands[bands.length - 1];

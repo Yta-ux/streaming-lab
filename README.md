@@ -24,6 +24,7 @@ Projeto prático do seminário **Streaming e Distribuição Multimídia** (Tópi
 ## Requisitos
 
 - Node.js 20 ou superior
+- pnpm 9 ou superior
 - Um navegador moderno (Chrome, Edge, Firefox ou Safari)
 
 O ffmpeg é instalado automaticamente como dependência (`ffmpeg-static`); não é preciso ter o ffmpeg no sistema.
@@ -50,16 +51,17 @@ pnpm start       # compila a interface e serve tudo em http://localhost:3001
 ### Aba Italo
 
 1. **Rede simulada:** escolha o limite de banda (botões ou controle deslizante). A mudança vale imediatamente, inclusive no meio de um segmento.
-2. **Player:** ligue ou desligue o ABR. Com o ABR desligado, escolha a qualidade fixa.
+2. **Player:** ligue ou desligue o ABR. Com o ABR ligado, o player começa no 240p e sobe conforme a vazão permite. Com o ABR desligado, escolha a qualidade fixa.
 3. **Reiniciar reprodução:** começa uma nova sessão com as opções escolhidas.
 
 Experimentos sugeridos:
 
 | Experimento | Configuração | Resultado esperado |
 |---|---|---|
-| Referência | Sem limite, ABR ligado | Sobe para 720p, buffer cheio, sem travamentos |
+| Referência | Sem limite, ABR ligado | Começa em 240p e sobe para 720p; buffer cheio, sem travamentos |
 | Rede insuficiente | 1 Mbit/s, qualidade fixa 720p | Travamentos repetidos, taxa de buffering acima de 50% |
-| Queda de banda | Sem limite, ABR ligado, depois 1 Mbit/s durante a reprodução | O buffer absorve a queda e o player reduz a qualidade |
+| Queda de banda | Sem limite, ABR ligado, depois 1 Mbit/s durante a reprodução | O buffer absorve a queda; depois de cerca de 40 s o player reduz para 240p |
+| Limite do ABR | 500 kbit/s, ABR ligado | O player fica no 240p, o piso, e ainda trava: a rede é menor que a menor qualidade |
 
 ### Aba Nildo
 
@@ -72,14 +74,14 @@ Experimentos sugeridos na aba Nildo:
 | Experimento | Configuração | Resultado esperado |
 |---|---|---|
 | Protocolos sem limite | HLS e DASH, sem limite | Os dois sobem para 720p, sem travar |
-| ABR nos dois protocolos | HLS e DASH, 1 Mbit/s | Os dois reduzem a qualidade; o algoritmo de cada player pode escolher diferente |
+| ABR nos dois protocolos | HLS e DASH, 1 Mbit/s | Os dois adaptam a qualidade à vazão; o algoritmo de cada player decide |
 | Codecs | Tabela de codecs | Mesmo tamanho; PSNR aumenta de H.264 para AV1, e o tempo de codificação também |
 | Unicast congestiona | 720p, mais de 40 espectadores | A banda do unicast passa da capacidade de 100 Mbit/s; o multicast não muda |
 
 ## Como funciona
 
 ```
- Navegador (React + hls.js)  ──HTTP──▶  Servidor Node (origem)  ──▶  ./media (HLS)
+ Navegador (React + hls.js/dash.js)  ──HTTP──▶  Servidor Node (origem)  ──▶  ./media (HLS, DASH)
    player + painel de QoE                 limitador de banda
          │                                       ▲
          └──── POST /api/bandwidth ──────────────┘
@@ -103,6 +105,7 @@ Experimentos sugeridos na aba Nildo:
 | Travamentos | Interrupções da reprodução depois que ela começou (evento `waiting`) |
 | Taxa de buffering (*buffering ratio*) | Tempo travado dividido pelo tempo total da sessão |
 | Buffer à frente | Segundos de vídeo já recebidos além da posição atual |
+| Trocas de qualidade | Momento de cada troca de qualidade durante a sessão |
 
 As funções de cálculo estão em `web/src/lib/metrics.ts`, separadas do DOM e cobertas por testes unitários.
 
@@ -119,7 +122,6 @@ streaming-lab/
 │   ├── hooks/                   sessões de player (HLS; HLS e DASH) e coleta de métricas
 │   ├── lib/metrics.ts           cálculo das métricas (testado)
 │   └── components/              player, gráfico, controles, métricas, codecs, multicast
-└── docs/                        roteiros dos vídeos (roteiro-italo.md e roteiro-nildo.md)
 ```
 
 ## Comandos

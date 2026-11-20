@@ -31,7 +31,6 @@ export function CodecSection() {
       .catch(() => setFailed(true));
   }, []);
 
-  // Asks the browser whether it can decode each codec.
   const supported = (codec: CodecInfo) => videoRef.current?.canPlayType(codec.mime) !== '';
 
   const play = (codec: CodecInfo) => {

@@ -41,38 +41,46 @@ body {
 }
 
 .layout {
-  max-width: 1180px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 8px 20px 8px;
 }
 
 h1 {
-  margin: 0 0 16px;
-  font-size: 1.6rem;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
 }
 
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 16px;
+  padding: 12px 14px;
 }
 
 .card h2 {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   font-size: 1rem;
   display: flex;
   align-items: center;
@@ -80,10 +88,11 @@ h1 {
 }
 
 .card h2:not(:first-child) {
-  margin-top: 20px;
+  margin-top: 12px;
 }
 
 .video-card {
+  max-width: calc((100dvh - 360px) * 16 / 9);
   position: relative;
   padding: 0;
   overflow: hidden;
@@ -171,8 +180,8 @@ h1 {
 .presets {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .chip {
@@ -229,7 +238,7 @@ h1 {
   width: 100%;
   border: 0;
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 8px 14px;
   background: var(--accent);
   color: #fff;
   font: inherit;
@@ -255,8 +264,8 @@ h1 {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .metric {
@@ -319,8 +328,6 @@ h1 {
 .tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid var(--border);
 }
 
 .tab {
@@ -330,7 +337,7 @@ h1 {
   color: var(--muted);
   font: inherit;
   font-weight: 600;
-  padding: 10px 16px;
+  padding: 6px 14px;
   cursor: pointer;
 }
 
@@ -340,12 +347,12 @@ h1 {
 }
 
 .subtabs {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .manifest {
   margin: 0;
-  max-height: 260px;
+  max-height: 150px;
   overflow: auto;
   font-size: 0.78rem;
   line-height: 1.4;
@@ -429,4 +436,8 @@ th {
 
 .bad-text {
   color: var(--bad);
+}
+
+.metric-wide {
+  grid-column: 1 / -1;
 }

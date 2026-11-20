@@ -1,6 +1,3 @@
-// Encodes the same short synthetic clip with four codecs into ./media/codecs,
-// all at the same target bitrate, and writes codecs.json with the size, the
-// quality (PSNR against the source) and the encoding time of each one.
 
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -16,7 +13,6 @@ const DURATION_S = 10;
 const SIZE = '854x480';
 const FPS = 30;
 const TARGET_KBPS = 600;
-/** Keeps every encoder close to the same bitrate, so the comparison is fair. */
 const RATE = ['-b:v', `${TARGET_KBPS}k`, '-minrate', `${TARGET_KBPS}k`, '-maxrate', `${TARGET_KBPS}k`, '-bufsize', `${TARGET_KBPS * 2}k`];
 const SOURCE = `testsrc2=size=${SIZE}:rate=${FPS}`;
 
@@ -82,7 +78,6 @@ for (const codec of CODECS) {
     process.exit(1);
   }
 
-  // PSNR (dB) of the encoded clip against the source: higher means closer to the original.
   const psnr = spawnSync(
     ffmpeg,
     ['-i', target, '-f', 'lavfi', '-i', SOURCE, '-t', String(DURATION_S), '-lavfi', `[0:v]fps=${FPS},setpts=N/${FPS}/TB[a];[1:v]setpts=N/${FPS}/TB[b];[a][b]psnr`, '-f', 'null', '-'],

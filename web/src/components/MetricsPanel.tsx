@@ -15,11 +15,12 @@ export interface MetricProps {
   value: string;
   hint?: string;
   tone?: 'good' | 'bad';
+  wide?: boolean;
 }
 
-export function Metric({ label, value, hint, tone }: MetricProps) {
+export function Metric({ label, value, hint, tone, wide }: MetricProps) {
   return (
-    <div className={`metric${tone ? ` metric-${tone}` : ''}`}>
+    <div className={`metric${tone ? ` metric-${tone}` : ''}${wide ? ' metric-wide' : ''}`}>
       <span className="metric-label">{label}</span>
       <span className="metric-value">{value}</span>
       {hint && <span className="metric-hint">{hint}</span>}
@@ -30,6 +31,9 @@ export function Metric({ label, value, hint, tone }: MetricProps) {
 export function MetricsPanel({ state }: { state: SessionState }) {
   const { summary, levels, currentLevel, phase } = state;
   const level = levels[currentLevel];
+  const switchesLabel = state.switches
+    .map((s) => `${levels[s.level]?.name ?? '?'} (${s.t.toFixed(1)} s)`)
+    .join(' → ');
   const ratioTone = summary.bufferingRatio > 0.05 ? 'bad' : summary.playMs > 0 ? 'good' : undefined;
 
   return (
@@ -50,6 +54,7 @@ export function MetricsPanel({ state }: { state: SessionState }) {
           hint="tempo travado / tempo total"
           tone={ratioTone}
         />
+        <Metric label="Trocas de qualidade" value={switchesLabel || '—'} hint="momento de cada troca, em segundos de sessão" wide />
       </div>
     </section>
   );

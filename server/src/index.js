@@ -1,9 +1,3 @@
-// Origin server for the streaming lab.
-//
-// - Serves the HLS and MPEG-DASH files (and the codec clips) from ./media.
-// - Limits the download rate of media segments (.ts and .m4s) to a value that can be changed
-//   at runtime through /api/bandwidth. This is what simulates a congested link.
-// - Optionally serves the production build of the web app (./web/dist).
 
 import http from 'node:http';
 import fs from 'node:fs';
@@ -15,13 +9,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const MEDIA_DIR = path.resolve(here, '../../media');
 const WEB_DIR = path.resolve(here, '../../web/dist');
 
-/** Pacing interval: the budget of bytes is recomputed on every tick. */
 const TICK_MS = 50;
 const MAX_CHUNK_BYTES = 64 * 1024;
 const MIN_KBPS = 50;
 const MAX_KBPS = 100_000;
 
-/** Current limit in kbit/s. 0 means unlimited. */
 let bandwidthKbps = 0;
 
 const MIME = {
@@ -40,7 +32,6 @@ const MIME = {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Resolves when the socket drains or the client goes away. */
 function waitDrain(res) {
   return new Promise((resolve) => {
     const done = () => {
@@ -70,13 +61,11 @@ function readBody(req) {
   });
 }
 
-/** Resolves a URL path inside baseDir, or returns null if it escapes it. */
 function safeResolve(baseDir, urlPath) {
   const target = path.resolve(baseDir, '.' + path.posix.normalize('/' + urlPath));
   return target.startsWith(baseDir + path.sep) || target === baseDir ? target : null;
 }
 
-/** Streams a file at the current bandwidth limit (re-read on every tick). */
 async function sendThrottled(res, filePath, size) {
   let closed = false;
   res.on('close', () => {
@@ -121,7 +110,6 @@ async function serveMedia(req, res, urlPath) {
     'Cache-Control': 'no-store',
   };
 
-  // The codec clips are plain files played by <video>, which asks for byte ranges.
   const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range ?? '');
   if (range && (ext === '.mp4' || ext === '.webm')) {
     const start = range[1] ? Number(range[1]) : 0;
@@ -143,7 +131,6 @@ async function serveMedia(req, res, urlPath) {
     return;
   }
 
-  // Playlists and manifests are tiny and are not limited; only segments are.
   if (ext === '.ts' || ext === '.m4s') await sendThrottled(res, filePath, stat.size);
   else fs.createReadStream(filePath).pipe(res);
 }

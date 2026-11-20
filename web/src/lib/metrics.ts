@@ -1,26 +1,17 @@
-// Pure functions for the QoE metrics (Dobrian et al., SIGCOMM 2011).
-// They are kept free of DOM and hls.js so they can be unit tested.
 
 export interface RunSummary {
-  /** Time from the start of the session to the first frame, in ms. Null if playback never started. */
   joinTimeMs: number | null;
-  /** Number of rebuffering events after playback started. */
   stalls: number;
-  /** Total time spent stalled, in ms. */
   stallMs: number;
-  /** Total time spent playing, in ms. */
   playMs: number;
-  /** Stalled time divided by (stalled + playing) time, from 0 to 1. */
   bufferingRatio: number;
 }
 
-/** Buffering ratio: stalled time over total session time (playing + stalled). */
 export function bufferingRatio(stallMs: number, playMs: number): number {
   const total = stallMs + playMs;
   return total > 0 ? stallMs / total : 0;
 }
 
-/** Seconds of video buffered ahead of the playhead. */
 export function bufferAheadSeconds(ranges: { start: number; end: number }[], currentTime: number): number {
   for (const range of ranges) {
     if (currentTime >= range.start - 0.1 && currentTime <= range.end) {
